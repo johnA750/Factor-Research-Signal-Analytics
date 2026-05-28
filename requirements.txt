@@ -1,3 +1,6 @@
+# Install this repository's src-layout package in Streamlit Cloud.
+-e .
+
 pandas>=2.2
 numpy>=1.26
 yfinance>=0.2.40
