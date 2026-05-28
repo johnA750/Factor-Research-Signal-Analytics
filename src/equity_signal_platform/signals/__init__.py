@@ -5,6 +5,7 @@ from equity_signal_platform.signals.factors import (
     trend,
     volatility,
 )
+from equity_signal_platform.signals.scoring import combine_factor_scores, factor_weights_from_ic
 
 __all__ = [
     "compute_factor_scores",
@@ -12,5 +13,6 @@ __all__ = [
     "volatility",
     "trend",
     "mean_reversion",
+    "combine_factor_scores",
+    "factor_weights_from_ic",
 ]
-

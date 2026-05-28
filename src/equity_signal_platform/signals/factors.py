@@ -3,6 +3,8 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
+from equity_signal_platform.signals.scoring import combine_factor_scores
+
 
 def momentum(prices: pd.DataFrame, lookback_days: int = 252, skip_days: int = 21) -> pd.DataFrame:
     """Trailing return excluding the most recent period."""
@@ -57,7 +59,6 @@ def compute_factor_scores(prices: pd.DataFrame, config: dict | None = None) -> d
         "trend": _cross_sectional_rank(raw_trend, higher_is_better=True),
         "mean_reversion": _cross_sectional_rank(raw_mean_reversion, higher_is_better=False),
     }
-    composite = sum(ranked.values()) / len(ranked)
+    composite = combine_factor_scores(ranked, config.get("factor_weights"))
     ranked["composite"] = composite
     return ranked
-

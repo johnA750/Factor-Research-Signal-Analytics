@@ -33,6 +33,11 @@ signals:
   volatility_lookback_days: 63
   trend_window_days: 200
   mean_reversion_lookback_days: 21
+  factor_weights:
+    momentum: 0.25
+    volatility: 0.25
+    trend: 0.25
+    mean_reversion: 0.25
 
 portfolio:
   weighting: "inverse_volatility"
@@ -45,6 +50,46 @@ backtest:
   slippage_bps: 5
   risk_free_rate: 0.0
 
+walk_forward:
+  train_months: 36
+  test_months: 12
+  min_train_observations: 252
+
+regime:
+  benchmark_ticker: "SPY"
+  moving_average_days: 200
+  volatility_lookback_days: 21
+  volatility_quantile_window: 252
+  high_volatility_quantile: 0.60
+
+rolling:
+  window_days: 126
+
+factor_evaluation:
+  forward_return_days: 21
+  decay_periods: [1, 5, 10, 21, 63]
+  persistence_lags: [1, 5, 21, 63]
+
+experiments:
+  output_dir: "reports/experiments"
+  include_walk_forward: false
+  include_factor_diagnostics: false
+  definitions:
+    - name: "equal_weight_top_8"
+      description: "Top 8 composite factor names, equal weighted."
+      portfolio:
+        weighting: "equal"
+        top_n: 8
+    - name: "inverse_vol_top_8"
+      description: "Top 8 composite factor names, inverse volatility weighted."
+      portfolio:
+        weighting: "inverse_volatility"
+        top_n: 8
+    - name: "inverse_vol_top_5"
+      description: "More concentrated top 5 composite factor portfolio."
+      portfolio:
+        weighting: "inverse_volatility"
+        top_n: 5
+
 reporting:
   output_dir: "reports"
-
