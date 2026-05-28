@@ -13,12 +13,12 @@ from dashboard.data import load_research_context
 
 
 st.set_page_config(page_title="Factor Diagnostics | ESP", page_icon="ESP", layout="wide")
-config_path = render_sidebar()
+settings = render_sidebar()
 
 section_header("Factor Diagnostics", "Cross-sectional signal quality, decay, persistence, and dispersion.")
 
 with st.spinner("Loading factor diagnostics..."):
-    context = load_research_context(config_path)
+    context = load_research_context(settings.config_path, settings.use_demo_data)
 
 factor_summary = context["factor_summary"]
 
@@ -36,11 +36,13 @@ with left:
 with right:
     st.dataframe(context["persistence_frame"], use_container_width=True)
 
+st.subheader("Dispersion Analysis")
+st.caption("Monthly normalized dispersion of raw factor values. Higher values mean stronger cross-sectional separation.")
 st.plotly_chart(
     charts.line_chart(
-        context["dispersion_frame"],
-        list(context["dispersion_frame"].columns),
-        "Cross-Sectional Dispersion",
+        context["normalized_raw_dispersion"],
+        list(context["normalized_raw_dispersion"].columns),
+        "Normalized Cross-Sectional Dispersion",
         420,
     ),
     use_container_width=True,

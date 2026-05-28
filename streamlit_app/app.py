@@ -15,7 +15,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-config_path = render_sidebar()
+settings = render_sidebar()
 
 section_header(
     "Overview",
@@ -23,7 +23,7 @@ section_header(
 )
 
 with st.spinner("Loading research context..."):
-    context = load_research_context(config_path)
+    context = load_research_context(settings.config_path, settings.use_demo_data)
 
 summary = context["summary"]
 experiment_comparison = context["experiment_comparison"]

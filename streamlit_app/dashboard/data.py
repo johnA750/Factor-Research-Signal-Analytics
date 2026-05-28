@@ -6,6 +6,7 @@ import pandas as pd
 import streamlit as st
 
 from dashboard.bootstrap import ROOT
+from dashboard.demo_data import generate_demo_prices
 
 from equity_signal_platform.analytics import (
     capm_regression,
@@ -24,12 +25,13 @@ from equity_signal_platform.backtesting import run_backtest, run_walk_forward
 from equity_signal_platform.config import PlatformConfig
 from equity_signal_platform.data import download_adjusted_prices
 from equity_signal_platform.experiments import run_experiments
-from equity_signal_platform.signals import compute_factor_scores
+from equity_signal_platform.signals import compute_factor_scores, mean_reversion, momentum, trend, volatility
 from equity_signal_platform.universe import get_universe
 
 
 @st.cache_data(show_spinner=False, ttl=3600)
-def load_research_context(config_path: str) -> dict:
+def load_research_context(config_path: str, use_demo_data: bool = True) -> dict:
+    """Load prices, run analytics, and return shared dashboard state."""
     config = PlatformConfig.from_yaml(config_path)
     data_config = config.section("data")
     universe_config = config.section("universe")
@@ -43,16 +45,39 @@ def load_research_context(config_path: str) -> dict:
 
     benchmark_ticker = regime_config.get("benchmark_ticker", "SPY")
     tickers = sorted(set(get_universe(universe_config) + [benchmark_ticker]))
-    prices = download_adjusted_prices(
-        tickers=tickers,
-        start=data_config.get("start_date", "2018-01-01"),
-        end=data_config.get("end_date"),
-        auto_adjust=data_config.get("auto_adjust", True),
-        cache_path=ROOT / "data" / "dashboard_prices.csv",
-    )
+    if use_demo_data:
+        prices = generate_demo_prices(tickers=tickers, start=data_config.get("start_date", "2018-01-01"))
+    else:
+        prices = download_adjusted_prices(
+            tickers=tickers,
+            start=data_config.get("start_date", "2018-01-01"),
+            end=data_config.get("end_date"),
+            auto_adjust=data_config.get("auto_adjust", True),
+            cache_path=ROOT / "data" / "dashboard_prices.csv",
+        )
     benchmark_prices = prices[benchmark_ticker] if benchmark_ticker in prices else None
     research_prices = prices.drop(columns=[benchmark_ticker], errors="ignore")
     factors = compute_factor_scores(research_prices, signal_config)
+    research_returns = research_prices.pct_change()
+    raw_factors = {
+        "momentum": momentum(
+            research_prices,
+            lookback_days=signal_config.get("momentum_lookback_days", 252),
+            skip_days=signal_config.get("momentum_skip_days", 21),
+        ),
+        "volatility": volatility(
+            research_returns,
+            lookback_days=signal_config.get("volatility_lookback_days", 63),
+        ),
+        "trend": trend(
+            research_prices,
+            window_days=signal_config.get("trend_window_days", 200),
+        ),
+        "mean_reversion": mean_reversion(
+            research_prices,
+            lookback_days=signal_config.get("mean_reversion_lookback_days", 21),
+        ),
+    }
 
     result = run_backtest(
         prices=research_prices,
@@ -118,6 +143,16 @@ def load_research_context(config_path: str) -> dict:
             if name != "composite"
         }
     )
+    raw_dispersion_frame = pd.DataFrame(
+        {
+            name: cross_sectional_dispersion(signal)
+            for name, signal in raw_factors.items()
+        }
+    )
+    monthly_raw_dispersion = raw_dispersion_frame.resample("ME").mean()
+    normalized_raw_dispersion = (
+        monthly_raw_dispersion - monthly_raw_dispersion.mean()
+    ) / monthly_raw_dispersion.std(ddof=0)
 
     regimes = pd.DataFrame()
     regime_summaries = {}
@@ -158,6 +193,7 @@ def load_research_context(config_path: str) -> dict:
 
     return {
         "config": config.raw,
+        "use_demo_data": use_demo_data,
         "prices": prices,
         "research_prices": research_prices,
         "benchmark_prices": benchmark_prices,
@@ -171,6 +207,8 @@ def load_research_context(config_path: str) -> dict:
         "decay_frame": decay_frame,
         "persistence_frame": persistence_frame,
         "dispersion_frame": dispersion_frame,
+        "raw_dispersion_frame": raw_dispersion_frame,
+        "normalized_raw_dispersion": normalized_raw_dispersion,
         "regimes": regimes,
         "regime_summaries": regime_summaries,
         "capm": capm,

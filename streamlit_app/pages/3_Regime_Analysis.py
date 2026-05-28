@@ -13,12 +13,12 @@ from dashboard.data import load_research_context
 
 
 st.set_page_config(page_title="Regime Analysis | ESP", page_icon="ESP", layout="wide")
-config_path = render_sidebar()
+settings = render_sidebar()
 
 section_header("Regime Analysis", "Performance across bull, bear, high-volatility, and low-volatility market states.")
 
 with st.spinner("Loading regime analysis..."):
-    context = load_research_context(config_path)
+    context = load_research_context(settings.config_path, settings.use_demo_data)
 
 regime_summaries = context["regime_summaries"]
 if not regime_summaries:

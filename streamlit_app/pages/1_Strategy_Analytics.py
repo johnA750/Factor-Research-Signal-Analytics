@@ -10,16 +10,16 @@ import streamlit as st
 from dashboard import charts
 from dashboard.components import render_sidebar, section_header
 from dashboard.data import load_research_context
-from dashboard.formatting import format_percent
+from dashboard.formatting import format_number, format_percent
 
 
 st.set_page_config(page_title="Strategy Analytics | ESP", page_icon="ESP", layout="wide")
-config_path = render_sidebar()
+settings = render_sidebar()
 
 section_header("Strategy Analytics", "Rolling performance diagnostics, turnover, returns, and CAPM exposure.")
 
 with st.spinner("Loading strategy analytics..."):
-    context = load_research_context(config_path)
+    context = load_research_context(settings.config_path, settings.use_demo_data)
 
 result = context["result"]
 rolling = context["rolling"]
@@ -62,5 +62,8 @@ st.subheader("CAPM Regression")
 if context["capm"].empty:
     st.info("CAPM results are unavailable because benchmark data was not loaded.")
 else:
+    capm_cols = st.columns(3)
+    capm_cols[0].metric("Annualized Alpha", format_percent(context["capm"]["annualized_alpha"]))
+    capm_cols[1].metric("Market Beta", format_number(context["capm"]["beta"]))
+    capm_cols[2].metric("R-Squared", format_percent(context["capm"]["r_squared"]))
     st.dataframe(context["capm"].rename("value").to_frame(), use_container_width=True)
-

@@ -41,12 +41,11 @@ def performance_by_regime(
 ) -> dict[str, pd.DataFrame]:
     """Evaluate strategy performance grouped by market and volatility regimes."""
     returns_col = "strategy_return"
-    equity_col = "equity_curve"
     turnover_col = "turnover"
     aligned = pd.concat(
         [
             returns.rename(returns_col),
-            equity_curve.rename(equity_col),
+            equity_curve.rename("equity_curve"),
             turnover.rename(turnover_col),
             regimes,
         ],

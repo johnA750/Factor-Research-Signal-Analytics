@@ -5,7 +5,7 @@ from dataclasses import dataclass
 import pandas as pd
 
 from equity_signal_platform.analytics.factor_diagnostics import mean_information_coefficients
-from equity_signal_platform.backtesting.engine import BacktestResult, run_backtest
+from equity_signal_platform.backtesting.engine import run_backtest
 from equity_signal_platform.signals import combine_factor_scores, factor_weights_from_ic
 
 
@@ -20,7 +20,11 @@ class WalkForwardResult:
     factor_weights: pd.DataFrame
 
 
-def _window_bounds(index: pd.DatetimeIndex, train_months: int, test_months: int) -> list[tuple[pd.Timestamp, pd.Timestamp, pd.Timestamp, pd.Timestamp]]:
+def _window_bounds(
+    index: pd.DatetimeIndex,
+    train_months: int,
+    test_months: int,
+) -> list[tuple[pd.Timestamp, pd.Timestamp, pd.Timestamp, pd.Timestamp]]:
     monthly_dates = pd.Series(index=index, data=index).resample("ME").last().dropna()
     bounds = []
     start = 0

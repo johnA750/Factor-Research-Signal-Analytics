@@ -36,19 +36,14 @@ def mean_information_coefficients(
 
 def hit_rate(signal: pd.DataFrame, fwd_returns: pd.DataFrame) -> float:
     """Share of dates where top-half ranked names beat bottom-half names."""
-    hits = []
     aligned_signal, aligned_returns = signal.align(fwd_returns, join="inner", axis=0)
-    for date in aligned_signal.index:
-        day_signal = aligned_signal.loc[date].dropna()
-        day_returns = aligned_returns.loc[date].reindex(day_signal.index).dropna()
-        day_signal = day_signal.reindex(day_returns.index)
-        if len(day_signal) < 4:
-            continue
-        median = day_signal.median()
-        top = day_returns[day_signal >= median].mean()
-        bottom = day_returns[day_signal < median].mean()
-        hits.append(top > bottom)
-    return float(pd.Series(hits).mean()) if hits else 0.0
+    median = aligned_signal.median(axis=1)
+    top_mask = aligned_signal.ge(median, axis=0)
+    bottom_mask = aligned_signal.lt(median, axis=0)
+    top_returns = aligned_returns.where(top_mask).mean(axis=1)
+    bottom_returns = aligned_returns.where(bottom_mask).mean(axis=1)
+    valid = top_returns.notna() & bottom_returns.notna()
+    return float((top_returns[valid] > bottom_returns[valid]).mean()) if valid.any() else 0.0
 
 
 def signal_persistence(signal: pd.DataFrame, lags: list[int]) -> pd.Series:
@@ -56,14 +51,7 @@ def signal_persistence(signal: pd.DataFrame, lags: list[int]) -> pd.Series:
     results = {}
     ranked = signal.rank(axis=1, pct=True)
     for lag in lags:
-        correlations = []
-        for date in ranked.index[lag:]:
-            current = ranked.loc[date]
-            previous = ranked.shift(lag).loc[date]
-            joined = pd.concat([current.rename("current"), previous.rename("previous")], axis=1).dropna()
-            if len(joined) >= 3:
-                correlations.append(joined["current"].corr(joined["previous"], method="spearman"))
-        results[f"lag_{lag}"] = pd.Series(correlations).mean() if correlations else pd.NA
+        results[f"lag_{lag}"] = ranked.corrwith(ranked.shift(lag), axis=1).mean(skipna=True)
     return pd.Series(results, name="signal_persistence")
 
 

@@ -15,12 +15,12 @@ from dashboard.data import load_research_context
 
 
 st.set_page_config(page_title="Experiment Lab | ESP", page_icon="ESP", layout="wide")
-config_path = render_sidebar()
+settings = render_sidebar()
 
 section_header("Experiment Lab", "Compare config-driven strategy variants and inspect saved experiment metadata.")
 
 with st.spinner("Loading experiment results..."):
-    context = load_research_context(config_path)
+    context = load_research_context(settings.config_path, settings.use_demo_data)
 
 comparison = context["experiment_comparison"]
 if comparison.empty:
