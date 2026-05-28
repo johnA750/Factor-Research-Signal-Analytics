@@ -1,0 +1,50 @@
+data:
+  start_date: "2018-01-01"
+  end_date: null
+  auto_adjust: true
+
+universe:
+  name: "starter_large_cap_us"
+  tickers:
+    - AAPL
+    - MSFT
+    - AMZN
+    - GOOGL
+    - META
+    - NVDA
+    - JPM
+    - JNJ
+    - V
+    - PG
+    - UNH
+    - HD
+    - MA
+    - XOM
+    - PEP
+    - KO
+    - MRK
+    - ABBV
+    - COST
+    - CRM
+
+signals:
+  momentum_lookback_days: 252
+  momentum_skip_days: 21
+  volatility_lookback_days: 63
+  trend_window_days: 200
+  mean_reversion_lookback_days: 21
+
+portfolio:
+  weighting: "inverse_volatility"
+  top_n: 8
+
+backtest:
+  initial_capital: 100000
+  rebalance_frequency: "ME"
+  transaction_cost_bps: 10
+  slippage_bps: 5
+  risk_free_rate: 0.0
+
+reporting:
+  output_dir: "reports"
+
