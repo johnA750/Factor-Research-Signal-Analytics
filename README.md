@@ -1,51 +1,71 @@
 # Equity Signal Platform
 
-A compact Python research platform for downloading equity data, building cross-sectional factor signals, backtesting simple systematic portfolios, and visualizing results.
+A Python research platform for downloading equity data, building cross-sectional factor signals, backtesting systematic portfolios, evaluating experiments, and presenting results in a polished Streamlit research dashboard.
 
-This project is designed for quant research recruiting conversations. It favors readable methodology, out-of-sample evaluation, and defensible assumptions over production trading complexity. It is a research and simulation tool only, not a live trading bot.
+This project is designed for quant research recruiting conversations. It favors readable methodology, out-of-sample evaluation, and defensible assumptions over production trading complexity. It is a research and simulation tool only, not a live trading bot or investment recommendation system.
 
 ## What It Does
 
 - Downloads adjusted daily prices with `yfinance`
 - Defines a starter large-cap U.S. equity universe
 - Computes momentum, volatility, trend, and mean reversion signals
-- Combines factor ranks into a simple composite score
 - Builds equal-weight or inverse-volatility portfolios
-- Runs a monthly rebalance backtest with transaction costs and slippage
-- Reports total return, annualized return, volatility, Sharpe ratio, max drawdown, and turnover
+- Runs monthly rebalance backtests with transaction costs and slippage
 - Runs rolling walk-forward train/test evaluations
-- Classifies bull/bear and high/low volatility market regimes using SPY
-- Computes rolling Sharpe, volatility, drawdown, and turnover
-- Evaluates factor hit rate, information coefficient, decay, persistence, and dispersion
+- Classifies SPY-based bull/bear and high/low volatility regimes
+- Computes rolling Sharpe, volatility, drawdown, returns, and turnover
+- Evaluates factor IC, hit rate, decay, persistence, and dispersion
 - Estimates CAPM alpha/beta and supports generic factor regression inputs
 - Runs lightweight config-driven experiments and compares results
-- Produces equity curve and drawdown plots
-- Includes a Streamlit dashboard for strategy analytics, regimes, factor diagnostics, and experiment comparison
+- Produces charts, CSV outputs, and a multipage Streamlit dashboard
 
 ## Project Structure
 
 ```text
 equity-signal-platform/
-├── config/
-│   └── default.yaml
-├── examples/
-│   └── run_backtest.py
-├── src/
-│   └── equity_signal_platform/
-│       ├── analytics/
-│       ├── backtesting/
-│       ├── config.py
-│       ├── data/
-│       ├── experiments/
-│       ├── portfolio/
-│       ├── reporting/
-│       ├── signals/
-│       └── universe.py
-├── streamlit_app/
-│   └── app.py
-├── tests/
-├── requirements.txt
-└── README.md
+|-- .streamlit/
+|   `-- config.toml
+|-- config/
+|   `-- default.yaml
+|-- docs/
+|   `-- images/
+|-- examples/
+|   |-- run_backtest.py
+|   `-- run_experiments.py
+|-- src/
+|   `-- equity_signal_platform/
+|       |-- analytics/
+|       |-- backtesting/
+|       |-- data/
+|       |-- experiments/
+|       |-- portfolio/
+|       |-- reporting/
+|       |-- signals/
+|       `-- universe.py
+|-- streamlit_app/
+|   |-- app.py
+|   |-- dashboard/
+|   `-- pages/
+|-- tests/
+|-- requirements.txt
+|-- runtime.txt
+`-- README.md
+```
+
+## Project Architecture
+
+```mermaid
+flowchart LR
+    Config["YAML Config"] --> Data["Data Download"]
+    Data --> Signals["Factor Signals"]
+    Signals --> Portfolio["Portfolio Construction"]
+    Portfolio --> Backtest["Backtest Engine"]
+    Backtest --> Analytics["Analytics Layer"]
+    Analytics --> Experiments["Experiment Runner"]
+    Analytics --> Reports["Reports and CSV Outputs"]
+    Analytics --> Dashboard["Multipage Streamlit Dashboard"]
+    Experiments --> Dashboard
+    Reports --> Dashboard
 ```
 
 ## Installation
@@ -72,22 +92,21 @@ source .venv/bin/activate
 python examples/run_backtest.py --config config/default.yaml
 ```
 
-Outputs are written to `reports/`:
+Outputs are written to `reports/`, including:
 
 - `backtest_results.csv`
 - `performance_summary.csv`
 - `latest_signal_ranks.csv`
-- `equity_curve.png`
-- `drawdown.png`
 - `rolling_metrics.csv`
 - `factor_summary.csv`
 - `capm_regression.csv`
 - `walk_forward_returns.csv`
 - `*_regime_summary.csv`
+- chart PNG files
 
 ## Run Experiments
 
-The default config includes three simple experiment definitions. Run them with:
+The default config includes three simple experiment definitions:
 
 ```bash
 python examples/run_experiments.py --config config/default.yaml
@@ -107,12 +126,28 @@ Outputs are written to `reports/experiments/`:
 streamlit run streamlit_app/app.py
 ```
 
-The dashboard can run a fresh backtest from the configured universe and display:
+## Dashboard Overview
 
-- Strategy analytics: performance metrics, equity curve, walk-forward curve, rolling metrics, CAPM table
-- Regime analysis: bull/bear and volatility-regime performance
-- Factor diagnostics: IC, hit rate, persistence, dispersion, and current rankings
-- Experiment comparison: config-driven strategy variants side by side
+The dashboard is organized as a Streamlit multipage research interface:
+
+- Overview: platform summary, key metrics, latest experiments, equity curve, drawdown, and top signals
+- Strategy Analytics: rolling Sharpe, volatility, drawdown, turnover, rolling returns, monthly return heatmap, and CAPM table
+- Factor Diagnostics: IC charts, hit rate, decay, persistence, dispersion, and current rankings
+- Regime Analysis: bull/bear and high/low volatility performance tables and charts
+- Experiment Lab: sortable experiment comparison, parameter comparison, metadata, and walk-forward windows
+- Research Reports: generated charts, CSV downloads, and experiment artifacts
+
+The dashboard uses shared cached data loading in `streamlit_app/dashboard/data.py`, reusable chart helpers in `streamlit_app/dashboard/charts.py`, and one page file per research area in `streamlit_app/pages/`.
+
+## Screenshots
+
+![Dashboard Overview](docs/images/dashboard-overview.png)
+
+![Strategy Analytics](docs/images/dashboard-strategy-analytics.png)
+
+![Factor Diagnostics](docs/images/dashboard-factor-diagnostics.png)
+
+![Experiment Lab](docs/images/dashboard-experiment-lab.png)
 
 ## Methodology
 
@@ -125,13 +160,18 @@ The default strategy is a monthly rebalanced long-only factor portfolio. The res
    - Volatility: trailing realized volatility, ranked lower-is-better.
    - Trend: price versus moving average.
    - Mean reversion: short-term trailing return, ranked lower-is-better.
-4. On each month-end rebalance date, stocks are ranked by a composite of normalized factor ranks.
-5. The top-ranked securities are selected.
-6. Portfolio weights are formed using either equal weight or inverse volatility.
-7. Weights selected at a rebalance are applied to future daily returns until the next rebalance.
-8. Transaction costs and slippage are charged based on portfolio turnover at each rebalance.
+4. Month-end signal ranks select top names.
+5. Portfolio weights are formed using either equal weight or inverse volatility.
+6. Rebalance weights are applied to future returns, avoiding same-close look-ahead.
+7. Transaction costs and slippage are charged based on turnover.
 
-The backtest shifts holdings forward after rebalance calculations so signal values are not applied to returns from the same close that produced the signal.
+## Research Workflow
+
+1. Configure universe, dates, factor parameters, portfolio construction, and experiment variants in `config/default.yaml`.
+2. Run `python examples/run_backtest.py --config config/default.yaml` to produce full diagnostics and report files.
+3. Run `python examples/run_experiments.py --config config/default.yaml` to compare strategy variants.
+4. Launch `streamlit run streamlit_app/app.py` to inspect results interactively.
+5. Use the dashboard reports page to review generated PNG and CSV artifacts.
 
 ### Walk-Forward Evaluation
 
@@ -139,11 +179,9 @@ Walk-forward testing estimates factor weights from a rolling training window and
 
 ### Regime Analysis
 
-The platform downloads SPY as the default benchmark. Bull/bear regimes are classified by whether SPY is above or below its moving average. Volatility regimes compare short-term realized volatility to a rolling historical quantile. Strategy performance is then summarized by market, volatility, and combined regimes.
+The platform downloads SPY as the default benchmark. Bull/bear regimes are classified by whether SPY is above or below its moving average. Volatility regimes compare short-term realized volatility to a rolling historical quantile. Strategy performance is summarized by market, volatility, and combined regimes.
 
 ### Factor Diagnostics
-
-Factor diagnostics are cross-sectional and intentionally simple:
 
 - Information coefficient: Spearman rank correlation between signal scores and forward returns
 - Hit rate: frequency that top-half ranked names outperform bottom-half ranked names
@@ -159,6 +197,24 @@ CAPM regression estimates annualized alpha, market beta, R-squared, and t-statis
 
 Experiments are defined in `config/default.yaml`. Each experiment overrides selected base settings, runs the same research workflow, saves metadata, and contributes to a comparison table. This keeps strategy variants reproducible without adding heavyweight infrastructure.
 
+## Deployment Preparation
+
+The repository is structured for Streamlit Community Cloud:
+
+- App entrypoint: `streamlit_app/app.py`
+- Dependencies: `requirements.txt`
+- Python version hint: `runtime.txt`
+- Streamlit theme/navigation config: `.streamlit/config.toml`
+- No credentials or live trading keys are required
+
+Suggested deployment steps:
+
+1. Push the repository to GitHub.
+2. Create a new Streamlit Community Cloud app from the repo.
+3. Set the main file path to `streamlit_app/app.py`.
+4. Let Streamlit install dependencies from `requirements.txt`.
+5. Present the app as a research simulation dashboard, not an investment advice product.
+
 ## Limitations
 
 - Yahoo Finance data may contain survivorship bias, missing data, stale prices, or adjusted price revisions.
@@ -169,16 +225,17 @@ Experiments are defined in `config/default.yaml`. Each experiment overrides sele
 - Transaction cost and slippage assumptions are simplified.
 - Results are for research and education. They do not imply future performance or guaranteed profitability.
 
-## Future Improvements
+## Future Roadmap
 
 - Point-in-time universe membership
 - Fundamental and alternative data factors
 - Sector and beta neutrality
-- Walk-forward validation
 - Risk model integration
 - More realistic execution simulation
-- Parameter sweep and experiment tracking
+- Richer parameter sweeps and experiment tracking
 - Exportable tear sheets
+- Fama-French factor data loader
+- Optional private-data support through Streamlit secrets
 
 ## Development
 
