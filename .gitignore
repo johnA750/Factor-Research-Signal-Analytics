@@ -15,8 +15,8 @@ venv/
 env/
 
 # Project outputs
-data/
-reports/
+/data/
+/reports/
 *.log
 
 # IDE / OS
