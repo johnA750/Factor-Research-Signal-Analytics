@@ -15,7 +15,7 @@ from dashboard.data import load_research_context
 st.set_page_config(page_title="Regime Analysis | ESP", page_icon="ESP", layout="wide")
 settings = render_sidebar()
 
-section_header("Regime Analysis", "Performance across bull, bear, high-volatility, and low-volatility market states.")
+section_header("Regime Analysis", "Performance across benchmark trend and volatility environments.")
 
 with st.spinner("Loading regime analysis..."):
     context = load_research_context(settings.config_path, settings.use_demo_data)
@@ -24,11 +24,12 @@ regime_summaries = context["regime_summaries"]
 if not regime_summaries:
     st.info("Regime summaries are unavailable because benchmark data was not loaded.")
 else:
+    st.caption("Regime analysis groups simulated strategy returns by benchmark market state. Bull/bear uses price versus moving average; volatility regimes use realized volatility versus a rolling threshold.")
     for name, table in regime_summaries.items():
         st.subheader(name.replace("_", " ").title())
         left, right = st.columns([1.1, 1])
         with left:
-            st.dataframe(table, use_container_width=True)
+            st.dataframe(table, use_container_width=True, height=260)
         with right:
             st.plotly_chart(
                 charts.bar_chart(

@@ -5,7 +5,7 @@ import streamlit as st
 from dashboard import charts
 from dashboard.components import render_sidebar, section_header
 from dashboard.data import load_research_context
-from dashboard.formatting import format_number, format_percent
+from dashboard.formatting import format_integer, format_number, format_percent
 
 
 st.set_page_config(
@@ -19,7 +19,7 @@ settings = render_sidebar()
 
 section_header(
     "Overview",
-    "A research terminal for systematic equity factor analysis, walk-forward evaluation, and experiment comparison.",
+    "A compact dashboard for systematic equity factor research, simulation backtests, and experiment comparison.",
 )
 
 with st.spinner("Loading research context..."):
@@ -28,12 +28,21 @@ with st.spinner("Loading research context..."):
 summary = context["summary"]
 experiment_comparison = context["experiment_comparison"]
 
-metric_cols = st.columns(5)
+st.markdown(
+    "Systematic equity research studies rules-based signals across a stock universe. "
+    "This demo shows a simulated long-only factor strategy, diagnostics for the underlying signals, "
+    "and comparisons across simple experiment settings."
+)
+
+metric_cols = st.columns(3)
 metric_cols[0].metric("Total Return", format_percent(summary["total_return"]))
 metric_cols[1].metric("CAGR", format_percent(summary["annualized_return"]))
-metric_cols[2].metric("Volatility", format_percent(summary["annualized_volatility"]))
-metric_cols[3].metric("Sharpe", format_number(summary["sharpe_ratio"]))
-metric_cols[4].metric("Max Drawdown", format_percent(summary["max_drawdown"]))
+metric_cols[2].metric("Sharpe", format_number(summary["sharpe_ratio"]), help="Risk-adjusted return: average excess return divided by volatility.")
+
+metric_cols = st.columns(3)
+metric_cols[0].metric("Volatility", format_percent(summary["annualized_volatility"]))
+metric_cols[1].metric("Max DD", format_percent(summary["max_drawdown"]), help="Largest peak-to-trough portfolio decline in the simulation.")
+metric_cols[2].metric("Avg Turnover", format_percent(summary["average_rebalance_turnover"]))
 
 left, right = st.columns([2, 1])
 
@@ -54,15 +63,23 @@ with right:
         st.info("No experiment comparison is available yet.")
     else:
         display_cols = ["annualized_return", "sharpe_ratio", "max_drawdown"]
+        experiment_display = experiment_comparison[display_cols].sort_values("sharpe_ratio", ascending=False).copy()
+        experiment_display["annualized_return"] *= 100.0
+        experiment_display["max_drawdown"] *= 100.0
         st.dataframe(
-            experiment_comparison[display_cols].sort_values("sharpe_ratio", ascending=False),
+            experiment_display,
             use_container_width=True,
             height=240,
+            column_config={
+                "annualized_return": st.column_config.NumberColumn("CAGR", format="%.1f%%"),
+                "sharpe_ratio": st.column_config.NumberColumn("Sharpe", format="%.2f"),
+                "max_drawdown": st.column_config.NumberColumn("Max DD", format="%.1f%%"),
+            },
         )
 
 st.subheader("Research Snapshot")
 snapshot_cols = st.columns(4)
 snapshot_cols[0].metric("Universe Size", len(context["research_prices"].columns))
-snapshot_cols[1].metric("Backtest Observations", len(context["result"].returns))
+snapshot_cols[1].metric("Observations", format_integer(len(context["result"].returns)))
 snapshot_cols[2].metric("Walk-Forward Windows", len(context["walk"].windows))
 snapshot_cols[3].metric("Avg. Turnover", format_percent(summary["average_rebalance_turnover"]))

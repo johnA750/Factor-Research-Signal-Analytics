@@ -22,7 +22,8 @@ with st.spinner("Loading factor diagnostics..."):
 
 factor_summary = context["factor_summary"]
 
-st.dataframe(factor_summary, use_container_width=True)
+st.caption("IC is the Spearman rank correlation between factor scores and forward returns. Hit rate measures how often top-ranked names beat bottom-ranked names.")
+st.dataframe(factor_summary, use_container_width=True, height=210)
 
 left, right = st.columns(2)
 with left:
@@ -32,9 +33,11 @@ with right:
 
 left, right = st.columns(2)
 with left:
+    st.caption("Factor decay shows how average IC changes as the forward-return horizon increases.")
     st.plotly_chart(charts.factor_decay_chart(context["decay_frame"]), use_container_width=True)
 with right:
-    st.dataframe(context["persistence_frame"], use_container_width=True)
+    st.caption("Persistence measures rank stability across lags; high values imply slower-changing signals.")
+    st.dataframe(context["persistence_frame"], use_container_width=True, height=360)
 
 st.subheader("Dispersion Analysis")
 st.caption("Monthly normalized dispersion of raw factor values. Higher values mean stronger cross-sectional separation.")

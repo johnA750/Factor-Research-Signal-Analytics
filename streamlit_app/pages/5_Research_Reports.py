@@ -31,21 +31,54 @@ else:
     else:
         st.info("No chart images found in reports.")
 
-    st.subheader("Downloadable CSV Outputs")
-    for csv_path in csv_files:
-        with csv_path.open("rb") as file:
-            st.download_button(
-                label=f"Download {csv_path.name}",
-                data=file,
-                file_name=csv_path.name,
-                mime="text/csv",
-            )
+    st.subheader("Downloadable Outputs")
+    if not csv_files:
+        st.info("No CSV outputs found.")
+    else:
+        groups = {
+            "Performance": ["performance", "backtest", "rolling", "walk_forward"],
+            "Signals And Factors": ["signal", "factor"],
+            "Regimes And Regression": ["regime", "capm"],
+        }
+        used_files = set()
+        for group_name, keywords in groups.items():
+            grouped = [path for path in csv_files if any(keyword in path.name for keyword in keywords)]
+            used_files.update(grouped)
+            if grouped:
+                with st.expander(group_name, expanded=group_name == "Performance"):
+                    for csv_path in grouped:
+                        with csv_path.open("rb") as file:
+                            st.download_button(
+                                label=csv_path.name,
+                                data=file,
+                                file_name=csv_path.name,
+                                mime="text/csv",
+                                use_container_width=True,
+                            )
+        remaining = [path for path in csv_files if path not in used_files]
+        if remaining:
+            with st.expander("Other Outputs"):
+                for csv_path in remaining:
+                    with csv_path.open("rb") as file:
+                        st.download_button(
+                            label=csv_path.name,
+                            data=file,
+                            file_name=csv_path.name,
+                            mime="text/csv",
+                            use_container_width=True,
+                        )
 
     st.subheader("Experiment Artifacts")
     experiment_dir = REPORTS_DIR / "experiments"
     if experiment_dir.exists():
-        for path in sorted(experiment_dir.rglob("*")):
-            if path.is_file():
-                st.caption(str(path.relative_to(REPORTS_DIR)))
+        artifact_files = [path for path in sorted(experiment_dir.rglob("*")) if path.is_file()]
+        if artifact_files:
+            st.dataframe(
+                [{"Artifact": str(path.relative_to(REPORTS_DIR))} for path in artifact_files],
+                use_container_width=True,
+                height=260,
+            )
+        else:
+            st.info("No experiment artifact files found.")
     else:
         st.info("No experiment artifacts found.")

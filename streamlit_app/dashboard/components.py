@@ -15,29 +15,30 @@ class DashboardSettings:
 
 def render_sidebar() -> DashboardSettings:
     st.sidebar.title("Equity Signal Platform")
-    st.sidebar.caption("Systematic equity research terminal")
+    st.sidebar.caption("Systematic equity research demo")
+
+    st.sidebar.markdown("**Navigation**")
     st.sidebar.page_link("app.py", label="Overview")
     st.sidebar.page_link("pages/1_Strategy_Analytics.py", label="Strategy Analytics")
     st.sidebar.page_link("pages/2_Factor_Diagnostics.py", label="Factor Diagnostics")
     st.sidebar.page_link("pages/3_Regime_Analysis.py", label="Regime Analysis")
     st.sidebar.page_link("pages/4_Experiment_Lab.py", label="Experiment Lab")
     st.sidebar.page_link("pages/5_Research_Reports.py", label="Research Reports")
+
     st.sidebar.divider()
-    config_path = st.sidebar.text_input("Config path", str(DEFAULT_CONFIG))
-    use_demo_data = st.sidebar.toggle(
-        "Use fast demo data",
-        value=True,
-        help="Use deterministic synthetic prices for quick demos. Turn off to download Yahoo Finance data.",
+    st.sidebar.markdown("**Dataset**")
+    data_mode = st.sidebar.radio(
+        "Research dataset",
+        ["Demo Research Dataset", "Yahoo Finance Download"],
+        index=0,
+        help="Demo mode uses deterministic synthetic prices for fast, stable public review.",
     )
-    if st.sidebar.button("Refresh Research Data"):
-        st.cache_data.clear()
-        st.rerun()
+    use_demo_data = data_mode == "Demo Research Dataset"
+    st.sidebar.caption("Default research configuration loaded.")
+
     st.sidebar.divider()
-    st.sidebar.markdown(
-        "Use the pages above to review portfolio performance, factor quality, regimes, experiments, and reports."
-    )
-    st.sidebar.caption("Research/simulation only. No live trading execution.")
-    return DashboardSettings(config_path=config_path, use_demo_data=use_demo_data)
+    st.sidebar.caption("For education and research demonstration only. No live trading or investment advice.")
+    return DashboardSettings(config_path=str(DEFAULT_CONFIG), use_demo_data=use_demo_data)
 
 
 def section_header(title: str, subtitle: str | None = None) -> None:

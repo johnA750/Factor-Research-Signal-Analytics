@@ -7,10 +7,7 @@ import plotly.graph_objects as go
 
 
 TEMPLATE = "plotly_white"
-BLUE = "#2454a6"
-GREEN = "#0f766e"
 RED = "#b42318"
-GOLD = "#b7791f"
 
 
 def _layout(fig: go.Figure, title: str, height: int = 380) -> go.Figure:
@@ -18,9 +15,13 @@ def _layout(fig: go.Figure, title: str, height: int = 380) -> go.Figure:
         title=title,
         template=TEMPLATE,
         height=height,
-        margin=dict(l=20, r=20, t=55, b=35),
+        margin=dict(l=16, r=16, t=56, b=36),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        hovermode="x unified",
+        font=dict(size=13),
     )
+    fig.update_xaxes(showgrid=False)
+    fig.update_yaxes(gridcolor="#e7ecf3", zerolinecolor="#d4dae5")
     return fig
 
 
@@ -31,14 +32,14 @@ def equity_curve(context: dict) -> go.Figure:
     fig.add_trace(go.Scatter(x=result.equity_curve.index, y=result.equity_curve, mode="lines", name="Backtest"))
     if not walk.equity_curve.empty:
         fig.add_trace(go.Scatter(x=walk.equity_curve.index, y=walk.equity_curve, mode="lines", name="Walk-Forward OOS"))
-    return _layout(fig, "Equity Curve", 420)
+    return _layout(fig, "Portfolio Equity Curve", 420)
 
 
 def drawdown(equity_curve: pd.Series) -> go.Figure:
     dd = equity_curve / equity_curve.cummax() - 1.0
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=dd.index, y=dd, fill="tozeroy", mode="lines", name="Drawdown", line=dict(color=RED)))
-    return _layout(fig, "Drawdown", 320)
+    return _layout(fig, "Portfolio Drawdown", 320)
 
 
 def line_chart(frame: pd.DataFrame, columns: list[str], title: str, height: int = 380) -> go.Figure:
@@ -76,14 +77,14 @@ def monthly_return_heatmap(returns: pd.Series) -> go.Figure:
             hovertemplate="%{y} %{x}<br>Return: %{z:.2%}<extra></extra>",
         )
     )
-    return _layout(fig, "Monthly Return Heatmap", 360)
+    return _layout(fig, "Monthly Returns", 360)
 
 
 def factor_ic_chart(ic_frame: pd.DataFrame) -> go.Figure:
     fig = go.Figure()
     for column in ic_frame.columns:
         fig.add_trace(go.Scatter(x=ic_frame.index, y=ic_frame[column].rolling(63).mean(), mode="lines", name=column))
-    return _layout(fig, "Rolling 63-Day Information Coefficient", 380)
+    return _layout(fig, "Rolling 63-Day IC", 380)
 
 
 def factor_decay_chart(decay_frame: pd.DataFrame) -> go.Figure:
@@ -91,4 +92,3 @@ def factor_decay_chart(decay_frame: pd.DataFrame) -> go.Figure:
     for factor in decay_frame.index:
         fig.add_trace(go.Scatter(x=decay_frame.columns, y=decay_frame.loc[factor], mode="lines+markers", name=factor))
     return _layout(fig, "Factor Decay", 360)
-
