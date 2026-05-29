@@ -5,7 +5,7 @@ import streamlit as st
 from dashboard import charts
 from dashboard.components import render_sidebar, section_header
 from dashboard.data import load_research_context
-from dashboard.formatting import format_integer, format_number, format_percent
+from dashboard.formatting import format_number, format_percent
 
 
 st.set_page_config(
@@ -80,6 +80,6 @@ with right:
 st.subheader("Research Snapshot")
 snapshot_cols = st.columns(4)
 snapshot_cols[0].metric("Universe Size", len(context["research_prices"].columns))
-snapshot_cols[1].metric("Observations", format_integer(len(context["result"].returns)))
+snapshot_cols[1].metric("Observations", f"{len(context['result'].returns):,}")
 snapshot_cols[2].metric("Walk-Forward Windows", len(context["walk"].windows))
 snapshot_cols[3].metric("Avg. Turnover", format_percent(summary["average_rebalance_turnover"]))
