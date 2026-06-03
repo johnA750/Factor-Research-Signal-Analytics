@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "equity-signal-platform"
 version = "0.1.0"
-description = "A Python platform for equity factor research and backtesting."
+description = "Interactive dashboard for evaluating equity factor signals, diagnostics, regime behavior, and experiment results."
 requires-python = ">=3.10"
 dependencies = [
     "pandas>=2.2",

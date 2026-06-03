@@ -14,7 +14,7 @@ from dashboard.components import render_sidebar, section_header
 from dashboard.data import load_research_context
 
 
-st.set_page_config(page_title="Experiment Lab | ESP", page_icon="ESP", layout="wide")
+st.set_page_config(page_title="Experiment Lab | FRSA", page_icon="FRSA", layout="wide")
 settings = render_sidebar()
 
 section_header("Experiment Lab", "Compare simple config-driven strategy variants.")

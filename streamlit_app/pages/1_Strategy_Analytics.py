@@ -13,7 +13,7 @@ from dashboard.data import load_research_context
 from dashboard.formatting import format_number, format_percent
 
 
-st.set_page_config(page_title="Strategy Analytics | ESP", page_icon="ESP", layout="wide")
+st.set_page_config(page_title="Strategy Analytics | FRSA", page_icon="FRSA", layout="wide")
 settings = render_sidebar()
 
 section_header("Strategy Analytics", "Rolling performance diagnostics, turnover, returns, and benchmark exposure.")

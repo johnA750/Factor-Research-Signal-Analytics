@@ -14,8 +14,8 @@ class DashboardSettings:
 
 
 def render_sidebar() -> DashboardSettings:
-    st.sidebar.title("Equity Signal Platform")
-    st.sidebar.caption("Systematic equity research demo")
+    st.sidebar.title("Factor Research & Signal Analytics")
+    st.sidebar.caption("Equity factor diagnostics demo")
 
     st.sidebar.markdown("**Navigation**")
     st.sidebar.page_link("app.py", label="Overview")

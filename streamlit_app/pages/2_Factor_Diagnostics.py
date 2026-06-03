@@ -12,7 +12,7 @@ from dashboard.components import render_sidebar, section_header
 from dashboard.data import load_research_context
 
 
-st.set_page_config(page_title="Factor Diagnostics | ESP", page_icon="ESP", layout="wide")
+st.set_page_config(page_title="Factor Diagnostics | FRSA", page_icon="FRSA", layout="wide")
 settings = render_sidebar()
 
 section_header("Factor Diagnostics", "Cross-sectional signal quality, decay, persistence, and dispersion.")

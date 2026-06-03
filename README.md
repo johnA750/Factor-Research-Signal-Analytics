@@ -1,8 +1,8 @@
-# Equity Signal Platform
+# Factor Research & Signal Analytics Platform
 
-A Python research project for studying simple cross-sectional equity factor signals, running simulation backtests, comparing experiments, and presenting results in a Streamlit dashboard.
+Interactive dashboard for evaluating equity factor signals, diagnostics, regime behavior, and experiment results.
 
-This project is built for portfolio review and quant internship recruiting. It is intentionally readable and modest in scope: the goal is to show a defensible research workflow, not to present production trading infrastructure or claim predictive performance.
+This project is built for portfolio review and quant internship recruiting. It is intentionally readable and modest in scope: the goal is to show a defensible signal research workflow, not to present production trading infrastructure or claim predictive performance.
 
 ## Disclaimer
 
@@ -15,14 +15,14 @@ This repository is for education and research demonstration only. It is not inve
 - Optional synthetic demo data for fast dashboard previews
 - Momentum, volatility, trend, and mean reversion factor signals
 - Equal-weight and inverse-volatility portfolio construction
-- Monthly rebalance simulation with transaction cost and slippage assumptions
+- Monthly rebalance simulation used to evaluate signal behavior with transaction cost and slippage assumptions
 - Walk-forward train/test evaluation using historical information coefficients
 - SPY-based bull/bear and high/low volatility regime analysis
 - Rolling Sharpe, volatility, drawdown, returns, and turnover
 - Factor diagnostics: information coefficient, hit rate, decay, persistence, and dispersion
 - CAPM regression against a benchmark return series
 - Lightweight config-driven experiment runner
-- Multipage Streamlit dashboard with report downloads
+- Multipage Streamlit dashboard for signal diagnostics and report downloads
 - Focused pytest coverage for core calculations
 
 ## Architecture
@@ -49,7 +49,7 @@ The code is organized around a simple research pipeline:
 2. Load either Yahoo Finance prices or deterministic demo prices.
 3. Compute factor signals from historical prices.
 4. Construct long-only portfolios at monthly rebalance dates.
-5. Simulate returns with cost and slippage assumptions.
+5. Simulate returns with cost and slippage assumptions to contextualize signal behavior.
 6. Evaluate performance, factor diagnostics, regimes, regressions, and experiments.
 7. Present results through the dashboard and saved report artifacts.
 

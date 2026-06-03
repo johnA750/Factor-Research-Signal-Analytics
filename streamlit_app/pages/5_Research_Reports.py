@@ -29,7 +29,7 @@ def download_frame(label: str, filename: str, frame: pd.DataFrame | pd.Series) -
     )
 
 
-st.set_page_config(page_title="Research Reports | ESP", page_icon="ESP", layout="wide")
+st.set_page_config(page_title="Research Reports | FRSA", page_icon="FRSA", layout="wide")
 settings = render_sidebar()
 
 section_header("Research Reports", "Download current research outputs and review generated artifacts.")
@@ -118,4 +118,3 @@ else:
 
     if not image_files and not csv_files and not (REPORTS_DIR / "experiments").exists():
         st.info("No saved report artifacts found.")
-

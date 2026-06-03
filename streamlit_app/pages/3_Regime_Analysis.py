@@ -12,7 +12,7 @@ from dashboard.components import render_sidebar, section_header
 from dashboard.data import load_research_context
 
 
-st.set_page_config(page_title="Regime Analysis | ESP", page_icon="ESP", layout="wide")
+st.set_page_config(page_title="Regime Analysis | FRSA", page_icon="FRSA", layout="wide")
 settings = render_sidebar()
 
 section_header("Regime Analysis", "Performance across benchmark trend and volatility environments.")

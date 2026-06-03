@@ -9,8 +9,8 @@ from dashboard.formatting import format_number, format_percent
 
 
 st.set_page_config(
-    page_title="Equity Signal Platform",
-    page_icon="ESP",
+    page_title="Factor Research & Signal Analytics Platform",
+    page_icon="FRSA",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -19,7 +19,7 @@ settings = render_sidebar()
 
 section_header(
     "Overview",
-    "A compact dashboard for systematic equity factor research, simulation backtests, and experiment comparison.",
+    "Interactive dashboard for evaluating equity factor signals, diagnostics, regime behavior, and experiment results.",
 )
 
 with st.spinner("Loading research context..."):
@@ -29,9 +29,9 @@ summary = context["summary"]
 experiment_comparison = context["experiment_comparison"]
 
 st.markdown(
-    "Systematic equity research studies rules-based signals across a stock universe. "
-    "This demo shows a simulated long-only factor strategy, diagnostics for the underlying signals, "
-    "and comparisons across simple experiment settings."
+    "Factor research studies rules-based signals across an equity universe. "
+    "This demo focuses on signal quality, regime behavior, and experiment diagnostics, "
+    "with simulated portfolio results used as context for evaluating the signals."
 )
 
 metric_cols = st.columns(3)
